@@ -1,0 +1,123 @@
+---
+title: "Final Project"
+author: "Renzo Paredes"
+date: "2025-04-26"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+```
+
+# Loading Data
+
+```{r}
+Budget_vs_Spending_Data <- read_excel("C:/Users/renzo/OneDrive/Escritorio/DATA 211-01 Data Science and Visualization/Final Project/Budget_vs_Spending_Data.xlsx")
+View(Budget_vs_Spending_Data)
+
+head(Budget_vs_Spending_Data)
+```
+
+# Data Preparation
+
+Prepare the dataset by converting the Date column to the correct type and reshaping the data for visualizations.
+
+```{r}
+Budget_vs_Spending_Data$Date <- as.Date(Budget_vs_Spending_Data$Date, format = "%m/%d/%Y")
+
+long_data <- pivot_longer(Budget_vs_Spending_Data, 
+                          cols = c(Daily_Budget, Daily_Spending),
+                          names_to = "Type", 
+                          values_to = "Amount")
+
+head(long_data)
+```
+
+# Line Plot - Daily Budget vs. Daily Spending
+
+Visualize how your daily budget and spending change over time.
+
+```{r}
+ggplot(Budget_vs_Spending_Data, aes(x = Date)) +
+  geom_line(aes(y = Daily_Budget, color = "Daily Budget"), size = 1.2) +
+  geom_line(aes(y = Daily_Spending, color = "Daily Spending"), size = 1.2) +
+  scale_color_manual(values = c("Daily Budget" = "#1f77b4", "Daily Spending" = "#ff7f0e")) +
+  labs(title = "Daily Budget vs. Daily Spending",
+       x = "Date", y = "Amount (USD)", color = "Legend") +
+  theme_minimal(base_size = 14)
+```
+
+# Bar Plot - Daily Comparison
+
+Compare daily budget and daily spending side-by-side for each day.
+
+```{r}
+ggplot(long_data, aes(x = Date, y = Amount, fill = Type)) +
+ geom_col(position = "dodge", width = 0.7) +
+ scale_fill_manual(values = c("Daily Budget" = "#1f77b4", "Daily Spending" = "#ff7f0e")) +
+ labs(title = "Daily Budget vs. Daily Spending (Side-by-Side)",
+      x = "Date", y = "Amount (USD)", fill = "Type") +
+ theme_light(base_size = 14) +
+ theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+ scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
+
+```
+
+
+# Boxplot - Distribution and Outliers
+
+Understand the distribution and detect potential outliers in your spending and budgeting.
+
+```{r}
+ggplot(long_data, aes(x = Type, y = Amount, fill = Type)) +
+  geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.size = 3) +
+  scale_fill_manual(values = c("Daily Budget" = "#1f77b4", "Daily Spending" = "#ff7f0e")) +
+  labs(title = "Distribution of Budget and Spending",
+       x = "", y = "Amount (USD)") +
+  theme_minimal(base_size = 14)
+```
+
+
+# Statistical Analysis: Paired t-Test
+
+We want to test whether the mean Daily Budget is significantly greater than the mean Daily Spending.
+Since the data points are related (budget and spending for the same day), we use a paired t-test.
+
+$$
+H_0: \mu_{\text{Daily Budget}} \le \mu_{\text{Daily Spending}}
+$$
+
+$$
+H_a: \mu_{\text{Daily Budget}} > \mu_{\text{Daily Spending}}
+$$
+
+Where:  
+- \( \mu_{\text{Daily Budget}} \) = Mean of the Daily Budget  
+- \( \mu_{\text{Daily Spending}} \) = Mean of the Daily Spending  
+
+This is a **one-tailed paired t-test**.
+
+```{r}
+t_test_result <- t.test(Budget_vs_Spending_Data$Daily_Budget, 
+                        Budget_vs_Spending_Data$Daily_Spending,
+                        paired = TRUE,
+                        alternative = "greater")
+
+t_test_result
+```
+
+# Conclusion
+
+Since the $p$-value = 0.7483 is greater than the significance level $\alpha = 0.05$, we fail to reject the null hypothesis $H_0$. At the $5\%$ significance level, we do not have enough evidence to conclude that the average Daily Budget ($\mu_{\text{budget}}$) is significantly greater than the average Daily Spending ($\mu_{\text{spending}}$).
+
+
