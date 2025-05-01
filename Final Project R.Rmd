@@ -90,15 +90,13 @@ ggplot(long_data, aes(x = Type, y = Amount, fill = Type)) +
 
 # Statistical Analysis: Paired t-Test
 
-We want to test whether the mean Daily Budget is significantly greater than the mean Daily Spending.
-Since the data points are related (budget and spending for the same day), we use a paired t-test.
-
+We want to test whether there is a significant difference between the mean Daily Budget and the mean Daily Spending.
 $$
-H_0: \mu_{\text{Daily Budget}} \le \mu_{\text{Daily Spending}}
+H_0: \mu_{\text{Daily Budget}} = \mu_{\text{Daily Spending}}
 $$
 
 $$
-H_a: \mu_{\text{Daily Budget}} > \mu_{\text{Daily Spending}}
+H_a: \mu_{\text{Daily Budget}} \ne \mu_{\text{Daily Spending}}
 $$
 
 Where:  
@@ -111,13 +109,13 @@ This is a **one-tailed paired t-test**.
 t_test_result <- t.test(Budget_vs_Spending_Data$Daily_Budget, 
                         Budget_vs_Spending_Data$Daily_Spending,
                         paired = TRUE,
-                        alternative = "greater")
+                        alternative = "two.sided")
 
 t_test_result
 ```
 
 # Conclusion
 
-Since the $p$-value = 0.7483 is greater than the significance level $\alpha = 0.05$, we fail to reject the null hypothesis $H_0$. At the $5\%$ significance level, we do not have enough evidence to conclude that the average Daily Budget ($\mu_{\text{budget}}$) is significantly greater than the average Daily Spending ($\mu_{\text{spending}}$).
+Since the $p$-value = 0.5035 is greater than the significance level $\alpha = 0.05$, we fail to reject the null hypothesis $H_0$. At the $5\%$ significance level, we do not have enough evidence to conclude that there is a significant difference between the average Daily Budget ($\mu_{\text{budget}}$) and the average Daily Spending ($\mu_{\text{spending}}$).
 
 
